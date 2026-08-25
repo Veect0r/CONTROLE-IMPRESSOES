@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Controle de Impressões</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600;700&family=Public+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body>
+
+    <div class="folha">
+
+        <div class="ficha">
+
+            <div class="ficha-perfuracao" aria-hidden="true">
+                <span th:each="i : ${#numbers.sequence(1, 14)}"></span>
+            </div>
+
+            <header class="ficha-cabecalho">
+                <span class="etiqueta">Sala de Reprografia</span>
+                <h1>Controle de Impressões</h1>
+            </header>
+
+            <div th:if="${mensagemSucesso}" class="aviso aviso-ok" th:text="${mensagemSucesso}"></div>
+            <div th:if="${mensagemErro}" class="aviso aviso-erro" th:text="${mensagemErro}"></div>
+
+            <section th:if="${resumo}" class="contador">
+                <div class="contador-topo">
+                    <span class="contador-mes" th:text="${resumo.nomeMes} + ' ' + ${resumo.hoje.year}"></span>
+                    <span class="contador-dia"
+                        th:text="'DIA ' + ${#numbers.formatInteger(resumo.diasTrabalhados, 2)}"></span>
+                </div>
+
+                <div class="contador-visores">
+                    <div class="visor">
+                        <div class="visor-digitos" th:text="${#numbers.formatInteger(resumo.totalPB, 5)}"></div>
+                        <span class="visor-legenda">Preto e branco</span>
+                    </div>
+                    <div class="visor visor-cor">
+                        <div class="visor-digitos" th:text="${#numbers.formatInteger(resumo.totalColorida, 5)}"></div>
+                        <span class="visor-legenda">Colorida</span>
+                    </div>
+                </div>
+
+                <div class="visor-total">
+                    <span class="visor-total-legenda">Total geral do mês</span>
+                    <span class="visor-total-numero" th:text="${#numbers.formatInteger(resumo.totalGeral, 5)}"></span>
+                </div>
+            </section>
+
+            <div class="linha-tracejada" aria-hidden="true"></div>
+
+            <form th:action="@{/registrar}" th:object="${registro}" method="post" class="formulario">
+
+                <div class="campo">
+                    <label for="professorId">Professor</label>
+                    <select id="professorId" th:field="*{professorId}" onchange="aoSelecionarProfessor()">
+                        <option value="">Selecione...</option>
+                        <option th:each="p : ${professores}" th:value="${p.id}" th:text="${p.nome}"
+                            th:attr="data-turma=${p.turma}, data-pb=${p.pb}, data-colorida=${p.colorida}, data-total=${p.total}">
+                        </option>
+                    </select>
+                    <span class="campo-erro" th:if="${#fields.hasErrors('professorId')}"
+                        th:errors="*{professorId}"></span>
+                </div>
+
+                <div class="campo campo-turma">
+                    <label for="turma">Turma</label>
+                    <input type="text" id="turma" readonly placeholder="—">
+                </div>
+
+                <div id="ficha-professor" class="ficha-professor" hidden>
+                    <span class="ficha-professor-titulo">Já pedido por <strong id="ficha-professor-nome"></strong> este
+                        mês</span>
+                    <div class="ficha-professor-linha">
+                        <div class="ficha-professor-item">
+                            <span id="ficha-professor-pb" class="ficha-professor-numero">0</span>
+                            <span class="ficha-professor-label">P&B</span>
+                        </div>
+                        <div class="ficha-professor-item">
+                            <span id="ficha-professor-colorida" class="ficha-professor-numero cor">0</span>
+                            <span class="ficha-professor-label">Colorida</span>
+                        </div>
+                        <div class="ficha-professor-item ficha-professor-destaque">
+                            <span id="ficha-professor-total" class="ficha-professor-numero">0</span>
+                            <span class="ficha-professor-label">Total</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="campo-dupla">
+                    <div class="campo">
+                        <label for="quantidadePB">Preto e branco</label>
+                        <input type="number" id="quantidadePB" th:field="*{quantidadePB}" min="0" step="1"
+                            inputmode="numeric">
+                        <span class="campo-erro" th:if="${#fields.hasErrors('quantidadePB')}"
+                            th:errors="*{quantidadePB}"></span>
+                    </div>
+                    <div class="campo">
+                        <label for="quantidadeColor">Colorida</label>
+                        <input type="number" id="quantidadeColor" th:field="*{quantidadeColor}" min="0" step="1"
+                            inputmode="numeric">
+                        <span class="campo-erro" th:if="${#fields.hasErrors('quantidadeColor')}"
+                            th:errors="*{quantidadeColor}"></span>
+                    </div>
+                </div>
+
+                <button type="submit" class="botao-carimbo">
+                    <span>Registrar impressão</span>
+                </button>
+            </form>
+
+        </div>
+
+        <p class="rodape">Os dados são gravados diretamente na planilha do mês atual.</p>
+    </div>
+
+    <script th:inline="javascript">
+        function aoSelecionarProfessor() {
+            const select = document.getElementById('professorId');
+            const opcao = select.options[select.selectedIndex];
+
+            const turma = opcao.getAttribute('data-turma') || '';
+            document.getElementById('turma').value = turma;
+
+            const painel = document.getElementById('ficha-professor');
+
+            if (!opcao.value) {
+                painel.hidden = true;
+                return;
+            }
+
+            const pb = opcao.getAttribute('data-pb') || '0';
+            const colorida = opcao.getAttribute('data-colorida') || '0';
+            const total = opcao.getAttribute('data-total') || '0';
+
+            document.getElementById('ficha-professor-nome').textContent = opcao.text;
+            document.getElementById('ficha-professor-pb').textContent = pb;
+            document.getElementById('ficha-professor-colorida').textContent = colorida;
+            document.getElementById('ficha-professor-total').textContent = total;
+            painel.hidden = false;
+        }
+        document.addEventListener('DOMContentLoaded', aoSelecionarProfessor);
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,16 @@
+# Configurações locais
+src/main/resources/application.properties
+
+# Credenciais Google
+src/main/resources/credentials/
+
+# Maven
+target/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Logs
+*.logcl

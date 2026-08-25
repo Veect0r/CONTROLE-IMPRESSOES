@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Erro no sistema</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body>
+    <div class="folha">
+        <div class="ficha">
+            <header class="ficha-cabecalho">
+                <span class="etiqueta">Erro</span>
+                <h1>Algo deu errado</h1>
+            </header>
+
+            <div class="aviso aviso-erro">
+                <p th:text="${mensagemErro}">Ocorreu um erro inesperado.</p>
+            </div>
+
+            <div class="campo">
+                <a class="botao-carimbo" th:href="@{/}">Voltar para a página inicial</a>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,10 @@
+spring.application.name=controle-impressoes
+server.port=8080
+server.servlet.session.tracking-modes=cookie
+
+google.sheets.credentials-path=classpath:credentials/service-account.json
+
+# Informe o ID da planilha por variável de ambiente.
+google.sheets.spreadsheet-id=${GOOGLE_SHEETS_SPREADSHEET_ID}
+
+spring.thymeleaf.cache=false
